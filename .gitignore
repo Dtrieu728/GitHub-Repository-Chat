@@ -216,3 +216,8 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# GitHub Repository Chat — local data
+data/
+.chroma/
+repos/
