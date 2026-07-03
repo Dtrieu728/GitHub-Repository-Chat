@@ -96,30 +96,21 @@ github-repo-chat chat --repo requests
 
 ```
 GitHub-Repository-Chat/
-├── src/
-│   └── github_repo_chat/
-│       ├── __init__.py
-│       ├── cli.py                 # CLI entry point
-│       ├── config.py              # Settings from env
-│       ├── ingestion/
-│       │   ├── github.py          # Clone / fetch repo
-│       │   ├── scanner.py         # Walk files, apply ignore rules
-│       │   └── chunker.py         # Split source into chunks
-│       ├── indexing/
-│       │   ├── embeddings.py      # Gemini embedding function
-│       │   └── chroma_store.py    # ChromaDB collection management
-│       ├── retrieval/
-│       │   └── retriever.py       # Query + filter + rerank
-│       └── generation/
-│           ├── prompts.py         # System / user prompt templates
-│           └── chat.py              # RAG answer generation
-├── tests/
-├── data/                          # ChromaDB persistence (gitignored)
+├── Backend/
+│   ├── src/github_repo_chat/
+│   │   ├── cli.py                 # CLI entry point
+│   │   ├── config.py              # Settings from env
+│   │   ├── ingestion/             # Clone, scan, chunk
+│   │   ├── indexing/              # Embeddings + ChromaDB
+│   │   ├── retrieval/             # Semantic search
+│   │   └── generation/            # RAG answer generation
+│   ├── tests/
+│   ├── pyproject.toml
+│   └── .env.example
+├── Frontend/                      # Web UI (future)
 ├── docs/
 │   ├── ARCHITECTURE.md
 │   └── PLAN.md
-├── pyproject.toml
-├── .env.example
 └── README.md
 ```
 
@@ -149,10 +140,3 @@ GitHub-Repository-Chat/
 - Answers are only as good as retrieved chunks; obscure or unindexed files won't appear.
 - Private repo support depends on a valid GitHub token with `repo` scope.
 
-## Contributing
-
-See [docs/PLAN.md](docs/PLAN.md) for the current implementation roadmap. Pick an unclaimed milestone or open an issue before starting substantial work.
-
-## License
-
-MIT (recommended — add `LICENSE` file when ready)

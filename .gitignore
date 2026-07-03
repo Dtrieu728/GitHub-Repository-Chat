@@ -219,5 +219,6 @@ __marimo__/
 
 # GitHub Repository Chat — local data
 data/
+Backend/data/
 .chroma/
 repos/
