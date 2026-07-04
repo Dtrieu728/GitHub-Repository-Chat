@@ -12,14 +12,16 @@ Phased roadmap for building GitHub Repository Chat from scratch. Each phase ends
 
 ### Tasks
 
-- [ ] Initialize `pyproject.toml` with dependencies:
+- [x] Initialize `pyproject.toml` with dependencies:
   - `google-genai`, `chromadb`, `typer`, `pydantic-settings`, `python-dotenv`
   - Dev: `pytest`, `ruff`, `mypy` (optional)
-- [ ] Create `src/github_repo_chat/` package layout (see README)
-- [ ] Add `config.py` with `Settings` model and `.env.example`
-- [ ] Implement CLI skeleton: `index`, `ask`, `chat`, `list`, `delete` (stubs)
-- [ ] Add `data/` and `.chroma/` to `.gitignore`
-- [ ] Add basic `pytest` smoke test (`test_config_loads`)
+- [x] Create `src/github_repo_chat/` package layout (see README)
+- [x] Add `config.py` with `Settings` model and `.env.example`
+- [x] Implement CLI skeleton: `index`, `ask`, `chat`, `list`, `delete` (stubs)
+- [x] Add `data/` and `.chroma/` to `.gitignore`
+- [x] Add basic `pytest` smoke test (`test_config_loads`)
+
+
 
 ### Milestone
 
@@ -27,12 +29,16 @@ Phased roadmap for building GitHub Repository Chat from scratch. Each phase ends
 github-repo-chat --help   # shows all commands
 ```
 
+
+
 ### Acceptance criteria
 
 - `pip install -e .` succeeds
 - Settings load from `.env` with validation errors for missing `GEMINI_API_KEY`
 
 ---
+
+
 
 ## Phase 1 — Repository ingestion
 
@@ -52,6 +58,8 @@ github-repo-chat --help   # shows all commands
 - [ ] Unit tests with a small fixture directory
 - [ ] CLI: `index` prints file count and exits (no embedding yet)
 
+
+
 ### Milestone
 
 ```bash
@@ -59,13 +67,17 @@ github-repo-chat index https://github.com/psf/requests --dry-run
 # → "Found 142 indexable files"
 ```
 
-### Acceptance criteria
+
+
+### Acceptance criteriaqewe
 
 - Public repo clones without token
 - `node_modules/`, `.git/`, `__pycache__/` excluded
 - Returns stable file list across runs
 
 ---
+
+
 
 ## Phase 2 — Code chunking
 
@@ -81,12 +93,16 @@ github-repo-chat index https://github.com/psf/requests --dry-run
 - [ ] Handle edge cases: empty files, single-line files, UTF-8 decode errors
 - [ ] Tests: Python file with multiple functions → multiple chunks with correct line ranges
 
+
+
 ### Milestone
 
 ```bash
 github-repo-chat index ... --chunks-only
 # → writes chunks.jsonl for inspection
 ```
+
+
 
 ### Acceptance criteria
 
@@ -95,6 +111,8 @@ github-repo-chat index ... --chunks-only
 - Metadata includes `file_path`, `start_line`, `end_line`, `language`
 
 ---
+
+
 
 ## Phase 3 — Embedding and ChromaDB indexing
 
@@ -115,6 +133,8 @@ github-repo-chat index ... --chunks-only
 - [ ] Progress output (tqdm or rich): files processed, chunks upserted
 - [ ] Integration test with mocked embedder writing to temp Chroma dir
 
+
+
 ### Milestone
 
 ```bash
@@ -123,6 +143,8 @@ github-repo-chat list
 # → requests (1,247 chunks)
 ```
 
+
+
 ### Acceptance criteria
 
 - Re-running `index` upserts without duplicate IDs
@@ -130,6 +152,8 @@ github-repo-chat list
 - Indexing 500-file repo completes without OOM (batch embed)
 
 ---
+
+
 
 ## Phase 4 — Retrieval and RAG generation
 
@@ -149,12 +173,16 @@ github-repo-chat list
 - [ ] CLI: `ask "How does Session work?"`
 - [ ] CLI: `chat` REPL with `--repo` flag; re-retrieve each turn
 
+
+
 ### Milestone
 
 ```bash
 github-repo-chat ask "What HTTP adapters are supported?" --repo requests
 # → Grounded answer citing requests/adapters.py
 ```
+
+
 
 ### Acceptance criteria
 
@@ -163,6 +191,8 @@ github-repo-chat ask "What HTTP adapters are supported?" --repo requests
 - `TOP_K` configurable via env/flag
 
 ---
+
+
 
 ## Phase 5 — Incremental indexing and polish
 
@@ -178,12 +208,16 @@ github-repo-chat ask "What HTTP adapters are supported?" --repo requests
 - [ ] GitHub Actions CI: lint + pytest
 - [ ] Optional: tree-sitter chunking for Python and JavaScript
 
+
+
 ### Milestone
 
 ```bash
 github-repo-chat reindex requests
 # → "Updated 12 files, skipped 130 unchanged, removed 2 deleted"
 ```
+
+
 
 ### Acceptance criteria
 
@@ -193,21 +227,27 @@ github-repo-chat reindex requests
 
 ---
 
+
+
 ## Phase 6 — Optional enhancements
 
 Pick based on user need; not required for v1 release.
 
-| Enhancement | Effort | Value |
-|-------------|--------|-------|
-| FastAPI + web chat UI | Medium | Non-CLI users |
-| Hybrid BM25 + vector search | Medium | Symbol/name queries |
-| Multi-repo query (`--repo a --repo b`) | Low | Compare libraries |
-| GitHub Action to pre-index on push | Medium | Always-fresh index |
-| Docker Compose one-liner | Low | Easier onboarding |
-| Conversation export (JSON/Markdown) | Low | Share answers |
-| Reranker (Cohere or local) | Medium | Better top-k quality |
+
+| Enhancement                            | Effort | Value                |
+| -------------------------------------- | ------ | -------------------- |
+| FastAPI + web chat UI                  | Medium | Non-CLI users        |
+| Hybrid BM25 + vector search            | Medium | Symbol/name queries  |
+| Multi-repo query (`--repo a --repo b`) | Low    | Compare libraries    |
+| GitHub Action to pre-index on push     | Medium | Always-fresh index   |
+| Docker Compose one-liner               | Low    | Easier onboarding    |
+| Conversation export (JSON/Markdown)    | Low    | Share answers        |
+| Reranker (Cohere or local)             | Medium | Better top-k quality |
+
 
 ---
+
+
 
 ## Dependency list (reference)
 
@@ -232,17 +272,23 @@ treesitter = ["tree-sitter>=0.22"]
 
 ---
 
+
+
 ## Risk register
 
-| Risk | Impact | Mitigation |
-|------|--------|------------|
-| Gemini API rate limits on large repos | Index fails mid-run | Batch + backoff; resume from last batch |
-| Poor retrieval for exact symbol names | Wrong/missing answers | Phase 6 hybrid search; mention `--path` in docs |
-| Huge files skew chunks | Noise in results | Strict size cap; split large files carefully |
-| Embedding model deprecation | Re-index required | Pin model in config; document migration |
-| Code sent to third-party API | Compliance blockers | Document in README; optional self-hosted embedder later |
+
+| Risk                                  | Impact                | Mitigation                                              |
+| ------------------------------------- | --------------------- | ------------------------------------------------------- |
+| Gemini API rate limits on large repos | Index fails mid-run   | Batch + backoff; resume from last batch                 |
+| Poor retrieval for exact symbol names | Wrong/missing answers | Phase 6 hybrid search; mention `--path` in docs         |
+| Huge files skew chunks                | Noise in results      | Strict size cap; split large files carefully            |
+| Embedding model deprecation           | Re-index required     | Pin model in config; document migration                 |
+| Code sent to third-party API          | Compliance blockers   | Document in README; optional self-hosted embedder later |
+
 
 ---
+
+
 
 ## Definition of done (v1.0)
 
@@ -256,6 +302,8 @@ treesitter = ["tree-sitter>=0.22"]
 
 ---
 
+
+
 ## Suggested build order (first sprint)
 
 If starting today, implement in this sequence for fastest path to a working demo:
@@ -268,6 +316,8 @@ If starting today, implement in this sequence for fastest path to a working demo
 
 ---
 
+
+
 ## Open questions
 
 Resolve before or during implementation:
@@ -276,3 +326,4 @@ Resolve before or during implementation:
 2. **Chunk size** — 512 tokens default; tune on a real monorepo?
 3. **Private repo priority** — Required for v1 or document as v1.1?
 4. **License** — MIT assumed; confirm before publish.
+

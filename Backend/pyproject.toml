@@ -8,7 +8,6 @@ version = "0.1.0"
 description = "RAG application for querying GitHub repositories with Gemini embeddings and ChromaDB"
 readme = "README.md"
 requires-python = ">=3.11"
-license = "MIT"
 dependencies = [
     "google-genai>=1.0",
     "chromadb>=0.5",
@@ -24,7 +23,7 @@ dev = [
 ]
 
 [project.scripts]
-github-repo-chat = "github_repo_chat.cli:app"
+github-repo-chat = "repo_chat.cli:app"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/github_repo_chat"]
