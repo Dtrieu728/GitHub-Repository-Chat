@@ -46,16 +46,16 @@ github-repo-chat --help   # shows all commands
 
 ### Tasks
 
-- [ ] `ingestion/github.py`
+- [x] `ingestion/github.py`
   - Parse `https://github.com/owner/repo` URLs
   - Shallow clone to `data/repos/{owner}_{repo}/`
   - Support `--branch`, `--local-path` (skip clone)
-- [ ] `ingestion/scanner.py`
+- [x] `ingestion/scanner.py`
   - Recursive file walk with extension allowlist
   - Respect `.gitignore` via `pathspec`
   - Skip binaries and files > 500 KB
   - Detect language from extension
-- [ ] Unit tests with a small fixture directory
+- [x] Unit tests with a small fixture directory
 - [ ] CLI: `index` prints file count and exits (no embedding yet)
 
 
@@ -69,7 +69,7 @@ github-repo-chat index https://github.com/psf/requests --dry-run
 
 
 
-### Acceptance criteriaqewe
+### Acceptance criteria
 
 - Public repo clones without token
 - `node_modules/`, `.git/`, `__pycache__/` excluded

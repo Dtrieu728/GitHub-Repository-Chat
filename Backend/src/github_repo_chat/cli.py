@@ -1,10 +1,33 @@
+from pathlib import Path
+
 import typer
+
+from github_repo_chat.ingestion.github import (
+    GitHubURLError,
+    RepoCloneError,
+    clone_or_update,
+    parse_github_url,
+    resolve_local_path,
+)
+from github_repo_chat.ingestion.scanner import ScanError, scan_repository
 
 app = typer.Typer(
     name="github-repo-chat",
     help="Index GitHub repositories and query them with natural language.",
     no_args_is_help=True,
 )
+
+DEFAULT_REPOS_ROOT = Path("data/repos")
+
+
+def _looks_like_local_path(source: str) -> bool:
+    """Heuristic: does `source` look like a filesystem path rather than a URL?"""
+    return not (
+        source.startswith("http://")
+        or source.startswith("https://")
+        or source.startswith("git@")
+        or "github.com" in source
+    )
 
 
 @app.command()
@@ -15,7 +38,39 @@ def index(
     dry_run: bool = typer.Option(False, "--dry-run", help="Scan files without indexing."),
 ) -> None:
     """Clone a repository, chunk source files, and store embeddings in ChromaDB."""
-    typer.echo(f"[stub] index source={source!r} name={name!r} branch={branch!r} dry_run={dry_run}")
+    try:
+        if _looks_like_local_path(source):
+            repo_path = resolve_local_path(source)
+            typer.echo(f"Using local repository: {repo_path}")
+        else:
+            ref = parse_github_url(source, branch=branch)
+            typer.echo(f"Resolving {ref.slug}" + (f" (branch: {ref.branch})" if ref.branch else "") + "...")
+            repo_path = clone_or_update(ref, DEFAULT_REPOS_ROOT)
+            typer.echo(f"Cloned to {repo_path}")
+    except GitHubURLError as exc:
+        typer.secho(f"Invalid source: {exc}", fg=typer.colors.RED)
+        raise typer.Exit(code=1) from exc
+    except RepoCloneError as exc:
+        typer.secho(f"Clone failed: {exc}", fg=typer.colors.RED)
+        raise typer.Exit(code=1) from exc
+
+    try:
+        result = scan_repository(repo_path)
+    except ScanError as exc:
+        typer.secho(f"Scan failed: {exc}", fg=typer.colors.RED)
+        raise typer.Exit(code=1) from exc
+
+    typer.echo(result.summary())
+
+    if dry_run:
+        typer.echo("(dry run -- no chunking or embedding performed)")
+        raise typer.Exit(code=0)
+
+    # Chunking (Phase 2) and embedding/storage (Phase 3) land here next.
+    typer.secho(
+        "[stub] chunking + embedding not implemented yet -- coming in Phase 2/3",
+        fg=typer.colors.YELLOW,
+    )
 
 
 @app.command()
